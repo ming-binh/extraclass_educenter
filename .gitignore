@@ -1,0 +1,8 @@
+build/
+dist/
+nbproject/private/
+nbproject/ant-deploy.xml
+nbproject/build-impl.xml
+*.class
+*.log
+
