@@ -47,7 +47,7 @@ public class BannerDAO {
     
     public List<BannerModal> getActiveBanners() throws Exception {
         List<BannerModal> banners = new ArrayList<>();
-        String sql = "SELECT * FROM banners WHERE is_active = true ORDER BY order_index ASC, created_at DESC";
+        String sql = "SELECT * FROM banners WHERE is_active = 1 ORDER BY order_index ASC, created_at DESC";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

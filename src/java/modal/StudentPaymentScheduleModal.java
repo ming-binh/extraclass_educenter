@@ -74,7 +74,7 @@ public class StudentPaymentScheduleModal {
         return markPaying;
     }
 
-    public void setMarkPaying(Boolean isPaid) {
+    public void setMarkPaying(Boolean markPaying) {
         this.markPaying = markPaying;
     }
 

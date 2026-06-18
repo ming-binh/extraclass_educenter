@@ -32,7 +32,7 @@ public class ConsultationDAO {
 
     public int insertConsultation(ConsultationModal c) throws Exception {
         String sql = "INSERT INTO consultation (name, email, dob, phone, status, address, subject, experience, schoolId, schoolClassId, created_at, updated_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, c.getName());
@@ -233,7 +233,7 @@ public class ConsultationDAO {
     }
 
     public void insertCertificate(int consultationId, String imageURL) throws Exception {
-        String sql = "INSERT INTO consultation_certificate (consultationId, imageURL, created_at) VALUES (?, ?, NOW())";
+        String sql = "INSERT INTO consultation_certificate (consultationId, imageURL, created_at) VALUES (?, ?, GETDATE())";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, consultationId);
             ps.setString(2, imageURL);
@@ -254,7 +254,7 @@ public class ConsultationDAO {
     }
 
     public int insertSchool(String name) throws Exception {
-        String sql = "INSERT INTO school (name, created_at) VALUES (?, NOW())";
+        String sql = "INSERT INTO school (name, created_at) VALUES (?, GETDATE())";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, name);
             ps.executeUpdate();

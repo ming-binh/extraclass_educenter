@@ -5,7 +5,6 @@
 
 package dao;
 
-import java.lang.*;
 import java.sql.*;
 import java.util.*;
 import modal.NotificationModal;
@@ -19,7 +18,7 @@ public class NotificationDao {
 
     public void addNotification(int accountId, String description) {
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement("INSERT INTO notification (accountId, description, is_read, created_at) VALUES (?, ?, 0, NOW())")) {
+             PreparedStatement ps = conn.prepareStatement("INSERT INTO notification (accountId, description, is_read, created_at) VALUES (?, ?, 0, GETDATE())")) {
             ps.setInt(1, accountId);
             ps.setString(2, description);
             ps.executeUpdate();
@@ -35,7 +34,7 @@ public class NotificationDao {
     }
 
     public boolean addNotificationToMultipleUsers(List<Integer> accountIds, String description) {
-        String sql = "INSERT INTO notifications (account_id, description, is_read, created_at) VALUES (?, ?, false, NOW())";
+        String sql = "INSERT INTO notification (accountId, description, is_read, created_at) VALUES (?, ?, 0, GETDATE())";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Integer accountId : accountIds) {
@@ -75,7 +74,7 @@ public class NotificationDao {
 
     public List<NotificationModal> getUnreadNotificationsByAccountId(int accountId) {
         List<NotificationModal> list = new ArrayList<>();
-        String sql = "SELECT id, account_id, description, is_read, created_at FROM notifications WHERE account_id = ? AND is_read = false ORDER BY created_at DESC";
+        String sql = "SELECT id, accountId, description, is_read, created_at FROM notification WHERE accountId = ? AND is_read = 0 ORDER BY created_at DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -83,7 +82,7 @@ public class NotificationDao {
                 while (rs.next()) {
                     list.add(new NotificationModal(
                         rs.getInt("id"),
-                        rs.getInt("account_id"),
+                        rs.getInt("accountId"),
                         rs.getString("description"),
                         rs.getBoolean("is_read"),
                         rs.getTimestamp("created_at").toLocalDateTime()
@@ -97,7 +96,7 @@ public class NotificationDao {
     }
 
     public boolean markAsRead(int notificationId) {
-        String sql = "UPDATE notifications SET is_read = true WHERE id = ?";
+        String sql = "UPDATE notification SET is_read = 1 WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, notificationId);
@@ -109,7 +108,7 @@ public class NotificationDao {
     }
 
     public boolean markAllAsReadByAccountId(int accountId) {
-        String sql = "UPDATE notifications SET is_read = true WHERE account_id = ? AND is_read = false";
+        String sql = "UPDATE notification SET is_read = 1 WHERE accountId = ? AND is_read = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -121,7 +120,7 @@ public class NotificationDao {
     }
 
     public boolean deleteNotification(int id) {
-        String sql = "DELETE FROM notifications WHERE id = ?";
+        String sql = "DELETE FROM notification WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -133,7 +132,7 @@ public class NotificationDao {
     }
 
     public int countUnreadNotifications(int accountId) {
-        String sql = "SELECT COUNT(*) FROM notifications WHERE account_id = ? AND is_read = false";
+        String sql = "SELECT COUNT(*) FROM notification WHERE accountId = ? AND is_read = 0";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -147,7 +146,7 @@ public class NotificationDao {
     }
 
     public NotificationModal getNotificationById(int id) {
-        String sql = "SELECT id, account_id, description, is_read, created_at FROM notifications WHERE id = ?";
+        String sql = "SELECT id, accountId, description, is_read, created_at FROM notification WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -155,7 +154,7 @@ public class NotificationDao {
                 if (rs.next()) {
                     return new NotificationModal(
                         rs.getInt("id"),
-                        rs.getInt("account_id"),
+                        rs.getInt("accountId"),
                         rs.getString("description"),
                         rs.getBoolean("is_read"),
                         rs.getTimestamp("created_at").toLocalDateTime()

@@ -39,7 +39,7 @@ public class StudentDAO extends DBUtil {
         student.setParentId(rs.getInt("parentId"));
         student.setCurrentGrade(rs.getString("currentGrade"));
         student.setCreatedAt(rs.getObject("created_at", LocalDateTime.class));
-        student.setUpdatedAt(rs.getObject("created_at", LocalDateTime.class));
+        student.setUpdatedAt(rs.getObject("updated_at", LocalDateTime.class));
 
         return student;
     }
@@ -132,7 +132,7 @@ public class StudentDAO extends DBUtil {
     }
 
     public void updateStudent(StudentModal student) throws Exception {
-        String sql = "UPDATE student SET currentGrade = ?, schoolId = ?, updated_at = NOW() WHERE id = ?";
+        String sql = "UPDATE student SET currentGrade = ?, schoolId = ?, updated_at = GETDATE() WHERE id = ?";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 

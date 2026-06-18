@@ -24,9 +24,10 @@ public class StudentPaymentScheduleDAO  {
     public static void markPaid(int studentId, int sectionId) {
         try (java.sql.Connection conn = utils.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(
-                "UPDATE student_payment_schedule sps " +
+                "UPDATE sps " +
+                "SET sps.isPaid = 1, sps.paid_date = GETDATE() " +
+                "FROM student_payment_schedule sps " +
                 "JOIN student_section ss ON sps.student_section_id = ss.id " +
-                "SET sps.isPaid = 1, sps.paid_date = NOW() " +
                 "WHERE ss.studentId = ? AND ss.sectionId = ?")) {
             ps.setInt(1, studentId);
             ps.setInt(2, sectionId);
@@ -116,7 +117,7 @@ public boolean isPaymentPending(int studentId, Integer courseId, Integer section
             "LEFT JOIN student_section ss ON sps.student_section_id = ss.id " +
             "WHERE ss.studentId = ? " +  
             "AND (sps.courseId = ? OR ss.sectionId = ?) " +
-            "AND (sps.markPaying = true OR sps.isPaid = true)")) {
+            "AND (sps.markPaying = 1 OR sps.isPaid = 1)")) {
         
         ps.setInt(1, studentId);
         ps.setInt(2, courseId);
@@ -134,21 +135,21 @@ public boolean isPaymentPending(int studentId, Integer courseId, Integer section
 
     public static List<Map<String, Object>> getPendingSchedules(int limit, int offset) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT sps.id as schedule_id, ss.student_id, ss.section_id, sps.amount, sps.isPaid, sps.due_date,sps.markPaying, " +
-                     "a.name as student_name, c.name as course_name, sec.date_time, sec.start_time, sec.end_time " +
+        String sql = "SELECT sps.id as schedule_id, ss.studentId as student_id, ss.sectionId as section_id, sps.amount, sps.isPaid, sps.due_date, sps.markPaying, " +
+                     "a.name as student_name, c.name as course_name, sec.dateTime as date_time, sec.startTime as start_time, sec.endTime as end_time " +
                      "FROM student_payment_schedule sps " +
                      "JOIN student_section ss ON sps.student_section_id = ss.id " +
-                     "JOIN student s ON ss.student_id = s.id " +
+                     "JOIN student s ON ss.studentId = s.id " +
                      "JOIN account a ON s.accountId = a.id " +
-                     "JOIN section sec ON ss.section_id = sec.id " +
-                     "JOIN course c ON sec.course_id = c.id " +
+                     "JOIN section sec ON ss.sectionId = sec.id " +
+                     "JOIN course c ON sec.courseId = c.id " +
                      "WHERE sps.isPaid = 0 " +
                      "ORDER BY sps.due_date ASC " +
-                     "LIMIT ? OFFSET ?";
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (java.sql.Connection conn = utils.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, limit);
-            ps.setInt(2, offset);
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
             java.sql.ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Map<String, Object> row = new java.util.HashMap<>();
@@ -195,7 +196,7 @@ public boolean isPaymentPending(int studentId, Integer courseId, Integer section
             WHERE student_section_id IN (
                 SELECT id FROM student_section WHERE studentId = ?
             )
-            AND isPaid = false
+            AND isPaid = 0
         """;
         try (java.sql.Connection conn = utils.DBUtil.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -251,7 +252,7 @@ public boolean isPaymentPending(int studentId, Integer courseId, Integer section
         String insertSql = """
         INSERT INTO student_payment_schedule 
         (student_section_id, amount, due_date, markPaying, isPaid, courseId, created_at, updated_at)
-        SELECT ?, ?, c.startDate, false, false, ?, NOW(), NOW()
+        SELECT ?, ?, c.startDate, 0, 0, ?, GETDATE(), GETDATE()
         FROM course c
         WHERE c.id = ?
         """;
@@ -279,7 +280,7 @@ public boolean isPaymentPending(int studentId, Integer courseId, Integer section
         String insertSql = """
         INSERT INTO student_payment_schedule 
         (student_section_id, amount, due_date, markPaying, isPaid, courseId, created_at, updated_at)
-        SELECT ?, ?, s.dateTime, false, false, ?, NOW(), NOW()
+        SELECT ?, ?, s.dateTime, 0, 0, ?, GETDATE(), GETDATE()
         FROM student_section ss
         JOIN section s ON ss.sectionId = s.id
         WHERE ss.id = ?

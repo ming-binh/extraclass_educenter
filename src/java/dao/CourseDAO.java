@@ -499,7 +499,7 @@ public class CourseDAO extends DBUtil {
      *7 Check tên khoá học
      * ------------------------------------------------- */
     public boolean existsByName(String name) {
-        String sql = "SELECT 1 FROM course WHERE name = ? LIMIT 1";
+        String sql = "SELECT TOP 1 1 FROM course WHERE name = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
@@ -648,13 +648,12 @@ public class CourseDAO extends DBUtil {
     public List<CourseModal> getHotCourses(int limit) {
         List<CourseModal> hotCourses = new ArrayList<>();
         String sql = """
-            SELECT c.*, a.name as teacherName 
+            SELECT TOP (?) c.*, a.name as teacherName 
             FROM course c
             JOIN teacher t ON c.teacherId = t.id
             JOIN account a ON t.accountId = a.id
-            WHERE c.isHot = true AND c.status = 'activated' OR c.status = 'upcoming'
+            WHERE (c.isHot = 1 AND c.status = 'activated') OR c.status = 'upcoming'
             ORDER BY c.created_at DESC
-            LIMIT ?
         """;
 
         try (Connection connection = DBUtil.getConnection(); PreparedStatement pre = connection.prepareStatement(sql)) {

@@ -117,7 +117,7 @@ public class StudentCourseDAO extends DBUtil {
             JOIN course c ON sc.courseId = c.id
             WHERE sc.studentId = ? 
               AND sc.status = 'accepted'
-              AND c.endDate < CURDATE()
+              AND c.endDate < CAST(GETDATE() AS DATE)
               AND (sc.isPaid IS NULL OR sc.isPaid = 0)
     """;
         try (PreparedStatement stmt = con.prepareStatement(sqlDebt)) {
@@ -273,7 +273,7 @@ public class StudentCourseDAO extends DBUtil {
     }
 
     public void deleteByStudentId(int studentId) {
-        String sql = "DELETE FROM student_course WHERE student_id = ?";
+        String sql = "DELETE FROM student_course WHERE studentId = ?";
         try (Connection con = DBUtil.getConnection(); PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setInt(1, studentId);
             stmt.executeUpdate();

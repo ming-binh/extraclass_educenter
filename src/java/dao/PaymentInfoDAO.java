@@ -50,7 +50,7 @@ public class PaymentInfoDAO {
     public PaymentInfoModal getActivePaymentInfo() {
         PaymentInfoModal info = null;
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM payment_info WHERE is_active = 1 LIMIT 1")) {
+             PreparedStatement ps = conn.prepareStatement("SELECT TOP 1 * FROM payment_info WHERE is_active = 1")) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 info = new PaymentInfoModal(
@@ -163,8 +163,8 @@ public class PaymentInfoDAO {
     }
     
     public boolean setActivePaymentInfo(int id) throws Exception {
-        String deactivateSql = "UPDATE payment_info SET is_active = false, updated_at = ?";
-        String activateSql = "UPDATE payment_info SET is_active = true, updated_at = ? WHERE id = ?";
+        String deactivateSql = "UPDATE payment_info SET is_active = 0, updated_at = ?";
+        String activateSql = "UPDATE payment_info SET is_active = 1, updated_at = ? WHERE id = ?";
         
         try (Connection conn = DBUtil.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(deactivateSql)) {

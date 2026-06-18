@@ -148,8 +148,9 @@ public class SectionDAO extends DBUtil {
      */
     public List<DayOfWeekEnum> getDaysOfWeekForCourse(int courseId) {
         List<DayOfWeekEnum> dayList = new ArrayList<>();
-        String sql = "SELECT DISTINCT dayOfWeek FROM section WHERE courseId = ? ORDER BY FIELD(dayOfWeek, "
-                + "'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')";
+        String sql = "SELECT DISTINCT dayOfWeek FROM section WHERE courseId = ? ORDER BY CASE dayOfWeek "
+                + "WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 "
+                + "WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 WHEN 'Sunday' THEN 7 END";
 
         try (Connection connection = DBUtil.getConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, courseId);
@@ -187,7 +188,7 @@ public class SectionDAO extends DBUtil {
             FROM section sec
             JOIN course c ON sec.courseId = c.id
             WHERE c.teacherId = ? 
-            AND sec.dateTime > NOW()
+            AND sec.dateTime > GETDATE()
             AND c.status = 'activated'
             ORDER BY sec.dateTime ASC
         """;

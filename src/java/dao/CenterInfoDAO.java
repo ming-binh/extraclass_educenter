@@ -20,7 +20,7 @@ import utils.DBUtil;
 public class CenterInfoDAO {
     
     public CenterInfoModal getCenterInfo() throws Exception {
-        String sql = "SELECT * FROM center_info LIMIT 1";
+        String sql = "SELECT TOP 1 * FROM center_info";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

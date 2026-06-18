@@ -53,7 +53,7 @@ public class SubmissionDAO {
     public void insertSubmission(int sectionAssignmentId, int courseId, int studentId, String filePath) throws Exception {
         String sql = "INSERT INTO submission_assignment "
                 + "(section_assignment_id, course_id, student_id, file_path, submitted_at) "
-                + "VALUES (?, ?, ?, ?, NOW())";
+                + "VALUES (?, ?, ?, ?, GETDATE())";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sectionAssignmentId);

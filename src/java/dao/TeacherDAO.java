@@ -37,7 +37,7 @@ public class TeacherDAO extends DBUtil {
         teacher.setSubject(TeacherModal.Subject.valueOf(rs.getString("subject")));
         teacher.setBio(rs.getString("bio"));
         teacher.setCreatedAt(rs.getObject("created_at", LocalDateTime.class));
-        teacher.setUpdatedAt(rs.getObject("created_at", LocalDateTime.class));
+        teacher.setUpdatedAt(rs.getObject("updated_at", LocalDateTime.class));
 
         return teacher;
     }
@@ -215,11 +215,10 @@ public class TeacherDAO extends DBUtil {
         SELECT t.*
         FROM teacher t
         JOIN (
-            SELECT teacherId, COUNT(*) AS course_count
+            SELECT TOP (?) teacherId, COUNT(*) AS course_count
             FROM course
             GROUP BY teacherId
             ORDER BY course_count DESC
-            LIMIT ?
         ) top ON t.id = top.teacherId
         """;
 
@@ -255,11 +254,10 @@ public class TeacherDAO extends DBUtil {
         FROM teacher t
         JOIN account a ON t.accountId = a.id
         JOIN (
-            SELECT teacherId, COUNT(*) AS course_count
+            SELECT TOP (?) teacherId, COUNT(*) AS course_count
             FROM course
             GROUP BY teacherId
             ORDER BY course_count DESC
-            LIMIT ?
         ) top ON t.id = top.teacherId
         ORDER BY top.course_count DESC
         """;
@@ -451,7 +449,7 @@ public class TeacherDAO extends DBUtil {
     }
 
     public boolean updateTeacher(TeacherModal teacher) throws Exception {
-        String sql = "UPDATE teacher SET schoolId = ?, experience = ?, bio = ?, updated_at = NOW() WHERE id = ?";
+        String sql = "UPDATE teacher SET schoolId = ?, experience = ?, bio = ?, updated_at = GETDATE() WHERE id = ?";
 
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, teacher.getSchoolId());

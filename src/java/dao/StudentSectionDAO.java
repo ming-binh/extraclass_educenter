@@ -578,7 +578,7 @@ public class StudentSectionDAO {
         SELECT ?, s.id
         FROM section s
         WHERE s.courseId = ?
-          AND s.dateTime > NOW()
+          AND s.dateTime > GETDATE()
           AND NOT EXISTS (
               SELECT 1 FROM student_section ss
               WHERE ss.studentId = ?
@@ -593,7 +593,7 @@ public class StudentSectionDAO {
         JOIN section s ON ss.sectionId = s.id
         WHERE ss.studentId = ? 
           AND s.courseId = ?
-          AND s.dateTime > NOW()
+          AND s.dateTime > GETDATE()
         ORDER BY s.dateTime ASC
         """;
         
@@ -647,7 +647,7 @@ public class StudentSectionDAO {
     public int createStudentSection(int studentId, int sectionId) {
         String sql = """
             INSERT INTO student_section (studentId, sectionId, isPaid, attendanceStatus, created_at)
-            VALUES (?, ?, false, 'absent', CURRENT_TIMESTAMP)
+            VALUES (?, ?, 0, 'absent', CURRENT_TIMESTAMP)
         """;
         try (Connection con = DBUtil.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
